@@ -1,11 +1,13 @@
-<!-- This example will demonstare converting a basic URL with pid and campaign to OneLink URL -->
-<!-- The calling URL should be: https://liaz-af.github.io/af-onelink-smart-script/examples/basic_url.html?af_c=gogo&af_pid=email -->
+<!-- This example will demonstare converting a basic URL with media_source and campaign to OneLink URL -->
+<!-- The calling URL should be: https://liaz-af.github.io/af-onelink-smart-script/examples/basic_url.html?incoming_campaign=gogo&incoming_mediasource=email -->
 <!-- The expected OneLink URL: https://engmntqa.onelink.me/LtRd/?pid=email&c=gogo&af_js_web=true -->
 <!DOCTYPE html>
 <html>
 <head>
   <!-- import the webpage's stylesheet -->
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="themes/prism.css"
+  />
 </head>
 <body>
   <div class="row">
@@ -39,6 +41,25 @@
       No input URL
     </textarea>
   </div>
+  <div>
+    <pre><code class="language-js">
+      //Initialising Smart Script arguments
+      var oneLinkURL = "https://engmntqa.onelink.me/LtRd/";
+      var mediaSource = {keys: ["incoming_mediasource"]};
+      var campaign = {keys: ["incoming_campaign"]};
+
+      //Calling the function after embedding the code will be through a global parameter 
+      //on the window object called window.AF_SMART_SCRIPT
+      //Onelink URL is generated
+      var result = window.AF_SMART_SCRIPT.generateOneLinkURL({
+        oneLinkURL,
+        afParameters:{
+          mediaSource: mediaSource,
+          campaign: campaign,
+        }
+      })
+    </code></pre>
+  </div>
   <div class="output_url-container">
     <h2>Output URL</h2>
     <textarea id="output_url" class="present_url">
@@ -46,26 +67,36 @@
     </textarea>
   </div>
 </div>
-  <script type="text/javascript" src="../scripts/onelink-smart-script.js"></script>
+  <script type="text/javascript" src="../scripts/onelink-smart-script-v2.0.0.js"></script>
   <script type="text/javascript">
     window.onload = function () {
       document.getElementById('input_url').innerHTML = window.location.href;
-      const onelinkGenerator =  new window.AF.OneLinkUrlGenerator(
-        {oneLinkURL: "https://engmntqa.onelink.me/LtRd/",
-         pidKeysList: ['af_pid'],
-         campaignKeysList: ['af_c']
-      });
-      const url = onelinkGenerator.generateUrl();
 
-      // onelink is generated
-      if (url) {
-            document.getElementById('andrd_link').setAttribute('href', url);
-            document.getElementById('ios_link').setAttribute('href', url);
-            document.getElementById('output_url').innerHTML = url;
+      //Initialising Smart Script arguments
+      var oneLinkURL = "https://engmntqa.onelink.me/LtRd/";
+      var mediaSource = {keys: ["incoming_mediasource"]};
+      var campaign = {keys: ["incoming_campaign"]};
+
+      //Calling the function after embedding the code will be through a global parameter on the window object called window.AF_SMART_SCRIPT
+      //Onelink URL is generated
+      var result = window.AF_SMART_SCRIPT.generateOneLinkURL({
+        oneLinkURL,
+        afParameters:{
+          mediaSource: mediaSource,
+          campaign: campaign,
+        }
+      })  
+      
+      var result_url = result.clickURL;
+      if (result_url) {
+            document.getElementById('andrd_link').setAttribute('href', result_url);
+            document.getElementById('ios_link').setAttribute('href', result_url);
+            document.getElementById('output_url').innerHTML = result_url;
       }
 
     };
   </script>
+  <script src="scripts/prism.js"></script>
 </body>
 
 </body>
