@@ -20,7 +20,7 @@ Table of contents:
   - [Single Key](https://liaz-af.github.io/af-onelink-smart-script/examples/single_key.html?incmp=gogo&inmedia=email)
   - [Multiple Keys](https://liaz-af.github.io/af-onelink-smart-script/examples/multiple_keys.html?incmp11=gogo11&inmedia22=email22)
   - [Override media source](https://liaz-af.github.io/af-onelink-smart-script/examples/override_mediasource.html?inmedia=old_value)
-  - [Media source default value](https://liaz-af.github.io/af-onelink-smart-script/examples/override_mediasource.html?inmedia_found=orig_media_value)
+  - [Media source default value](https://liaz-af.github.io/af-onelink-smart-script/examples/mediasource_default_value.html?inmedia_found=orig_media_value)
   - [Forced default values](https://liaz-af.github.io/af-onelink-smart-script/examples/forced_default_values.html?inmedia_found=plain_media_source)
   - [UTM Parameters](https://liaz-af.github.io/af-onelink-smart-script/examples/utm_parameters.html?utm_campaign=mycmpn&utm_source=mysource)
   - [Google Click ID](https://liaz-af.github.io/af-onelink-smart-script/examples/google_clickid.html?inmedia=email&gclid=1a2b3c&keyword=sale%2Bboat)
