@@ -43,7 +43,7 @@
   </div>
   <div>
     <pre><code class="language-js">
-      //Initialising Smart Script arguments
+      //Initializing Smart Script arguments
       var oneLinkURL = "https://engmntqa.onelink.me/LtRd/";
       var mediaSource = {keys: ["inmedia"]};
       var deepLinkValue = {keys: ["dp_dest"], defaultValue: "peaches"};
@@ -52,7 +52,7 @@
       // This custom value is forced
       var custom3 = {paramKey: "dl_product_source", keys: [], defaultValue: "dl_new_source"};
 
-      //Calling the function after embedding the code will be through a global parameter on the window object called window.AF_SMART_SCRIPT
+      //Function is embedded on the window object in a global parameter called window.AF_SMART_SCRIPT.
       //Onelink URL is generated
       var result = window.AF_SMART_SCRIPT.generateOneLinkURL({
         oneLinkURL,
@@ -80,7 +80,7 @@
     window.onload = function () {
       document.getElementById('input_url').innerHTML = window.location.href;
 
-      //Initialising Smart Script arguments
+      //Initializing Smart Script arguments
       var oneLinkURL = "https://engmntqa.onelink.me/LtRd/";
       var mediaSource = {keys: ["inmedia"]};
       var deepLinkValue = {keys: ["dp_dest"], defaultValue: "peaches"};

@@ -1,6 +1,6 @@
 <!-- This example will demonstare converting a URL to OneLink URL searching for multiple keys for media_source and campaign -->
-<!-- Calling URL: https://appsflyersdk.github.io/af-onelink-smart-script/examples/single_key.html?incmp11=gogo11&inmedia11=email11&incmp22=gogo22&inmedia22=email22  -->
-<!-- Expected OneLink URL: https://engmntqa.onelink.me/LtRd/?pid=email11&c=gogo22&af_js_web=true&af_ss_ver=2 -->
+<!-- Calling URL: https://appsflyersdk.github.io/af-onelink-smart-script/examples/single_key.html?incmp11=gogo11&inmedia22=email22 -->
+<!-- Expected OneLink URL: https://engmntqa.onelink.me/LtRd/?af_js_web=true&af_ss_ver=2&pid=email22&c=gogo11 -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -43,10 +43,10 @@
   </div>
   <div>
     <pre><code class="language-js">
-      //Initialising Smart Script arguments
+      //Initializing Smart Script arguments
       var oneLinkURL = "https://engmntqa.onelink.me/LtRd/";
-      var mediaSource = {keys: ["inmedia11"]};
-      var campaign = {keys: ["incmp22"]};
+      var mediaSource = {keys: ["inmedia11", "inmedia22"]};
+      var campaign = {keys: ["incmp11", "incmp22"]};
 
       //Calling the function after embedding the code will be through a global parameter 
       //on the window object called window.AF_SMART_SCRIPT
@@ -72,12 +72,12 @@
     window.onload = function () {
       document.getElementById('input_url').innerHTML = window.location.href;
 
-      //Initialising Smart Script arguments
+      //Initializing Smart Script arguments
       var oneLinkURL = "https://engmntqa.onelink.me/LtRd/";
-      var mediaSource = {keys: ["inmedia11"]};
-      var campaign = {keys: ["incmp22"]};
+      var mediaSource = {keys: ["inmedia11", "inmedia22"]};
+      var campaign = {keys: ["incmp11", "incmp22"]};
 
-      //Calling the function after embedding the code will be through a global parameter on the window object called window.AF_SMART_SCRIPT
+      //Function is embedded on the window object in a global parameter called window.AF_SMART_SCRIPT.
       //Onelink URL is generated
       var result = window.AF_SMART_SCRIPT.generateOneLinkURL({
         oneLinkURL,

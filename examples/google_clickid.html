@@ -43,7 +43,7 @@
   </div>
   <div>
     <pre><code class="language-js">
-      //Initialising Smart Script arguments
+      //Initializing Smart Script arguments
       var oneLinkURL = "https://engmntqa.onelink.me/LtRd/";
       var mediaSource = {keys: ["inmedia"]};
       var googleClickId = "af_sub2";
@@ -71,12 +71,12 @@
     window.onload = function () {
       document.getElementById('input_url').innerHTML = window.location.href;
 
-      //Initialising Smart Script arguments
+      //Initializing Smart Script arguments
       var oneLinkURL = "https://engmntqa.onelink.me/LtRd/";
       var mediaSource = {keys: ["inmedia"]};
       var googleClickId = {paramKey: "gkey"}
 
-      //Calling the function after embedding the code will be through a global parameter on the window object called window.AF_SMART_SCRIPT
+      //Function is embedded on the window object in a global parameter called window.AF_SMART_SCRIPT.
       //Onelink URL is generated
       var result = window.AF_SMART_SCRIPT.generateOneLinkURL({
         oneLinkURL,
