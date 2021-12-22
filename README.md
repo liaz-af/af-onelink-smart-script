@@ -18,7 +18,7 @@ Table of contents:
 - [Script](scripts/onelink-smart-script.js)
 - Sample use cases
   - [Single Key](https://liaz-af.github.io/af-onelink-smart-script/examples/single_key.html?incmp=gogo&inmedia=email)
-  - [Multiple Keys](https://liaz-af.github.io/af-onelink-smart-script/examples/single_key.html?incmp11=gogo11&inmedia22=email22)
+  - [Multiple Keys](https://liaz-af.github.io/af-onelink-smart-script/examples/multiple_keys.html?incmp11=gogo11&inmedia22=email22)
   - [Override media source](https://liaz-af.github.io/af-onelink-smart-script/examples/override_mediasource.html?inmedia=old_value)
   - [Media source default value](https://liaz-af.github.io/af-onelink-smart-script/examples/override_mediasource.html?inmedia_found=orig_media_value)
   - [Forced default values](https://liaz-af.github.io/af-onelink-smart-script/examples/forced_default_values.html?inmedia_found=plain_media_source)
