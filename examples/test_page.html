@@ -32,23 +32,18 @@
   <div class="url-container">
     <div class="input_url-container">
       <h2>Input URL</h2>
-      <textarea id="input_url" class="present_url">
-Paste here your URL (e.g. https://app.mypage.com/main.html?utm_source=mail&in_cmp=summersale)
-      </textarea>
+      <textarea id="input_url" class="present_url"></textarea>
     </div>
     <div>
       <pre>
-      <textarea id="input_code_for_run" class="prism-live line-numbers language-js fill" spellcheck="false">
-Paste your Smart Script code here      
-      </textarea>
-  </pre>
+      <textarea id="input_code_for_run" class="prism-live line-numbers language-js fill" spellcheck="false"></textarea>
+      </pre>
         <input type="button" value="Run Code" class="code_button" onclick="runTxtAreaCode()" />
+        <input type="button" value="Clear" class="code_button" onclick="clearInputs()" />
     </div>
     <div class="output_url-container">
       <h2>Output URL</h2>
-      <textarea id="output_url" class="present_url">
-        No output from script
-      </textarea>
+      <textarea id="output_url" class="present_url">No output from script</textarea>
     </div>
   </div>
   <div class="stores-wrapper">
@@ -69,9 +64,14 @@ Paste your Smart Script code here
     // load the input URL to thr input_url textArea
     if(localStorage.getItem('inUrl')){
       document.getElementById('input_url').innerHTML = localStorage.getItem('inUrl');
+    } else {
+      document.getElementById('input_url').innerHTML = "Paste here your URL (e.g. https://app.mypage.com/main.html?utm_source=mail&in_cmp=summersale)";
     }
+
     if(localStorage.getItem('newScript')){
       document.getElementById("input_code_for_run").value = localStorage.getItem('newScript'); 
+    } else {
+      document.getElementById("input_code_for_run").value = "Paste your Smart Script code here";
     }
 
     var headID = document.getElementsByTagName("head")[0];
@@ -80,11 +80,17 @@ Paste your Smart Script code here
     newScript.textContent = document.getElementById("input_code_for_run").value.replaceAll(/<\/?script>/ig, "");
     headID.appendChild(newScript);
 
-    var result_url = "No output from script"
-    if (AF_RESULT_SMART_SCRIPT) {
-      result_url = AF_RESULT_SMART_SCRIPT.clickURL;            
+    var result_url;
+    if (typeof AF_SMART_SCRIPT_RESULT !== "undefined" ) {
+      result_url = AF_SMART_SCRIPT_RESULT.clickURL;
+    } else if (typeof result !== "undefined") {
+      result_url = result.clickURL;
+    } 
+    if (result_url) {
       document.getElementById('andrd_link').setAttribute('href', result_url);
       document.getElementById('ios_link').setAttribute('href', result_url);
+    } else {
+      result_url  = "No output from script";
     }      
     document.getElementById('output_url').innerHTML = result_url;
 
@@ -96,6 +102,12 @@ Paste your Smart Script code here
       localStorage.setItem('newScript', document.getElementById("input_code_for_run").value);
       localStorage.setItem('inUrl', inUrl);
       window.location.search = inSearch;  
+    };
+
+    function clearInputs() {
+      localStorage.removeItem('inUrl');
+      localStorage.removeItem('newScript');
+      window.location.href = window.location.pathname;  
     };
 
   </script>

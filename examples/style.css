@@ -105,6 +105,7 @@ h2 {
   text-decoration: none;
   display: inline-block;
   font-size: 30px;
+  margin-left: 30px;
 }
 
 .code_button:active {
