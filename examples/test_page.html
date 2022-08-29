@@ -1,106 +1,130 @@
-<!-- This example will demonstare converting a URL to OneLink URL searching for a single key for media_source and campaign -->
-<!-- Calling URL: https://appsflyersdk.github.io/af-onelink-smart-script/examples/single_key.html?incmp=gogo&inmedia=email -->
-<!-- Expected OneLink URL: https://engmntqa.onelink.me/LtRd/?pid=email&c=gogo&af_js_web=true&af_ss_ver=2_2_0 -->
-
 <!DOCTYPE html>
 <html>
-<head>
-  <base herf="/">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="row">
-    <div class="column">
-      <img src="../images/appsflyerlogo.png" alt="AppsFlyer logo">
+  <head>
+    <base herf="/">
+    <link rel="stylesheet" href="./style_test_page.css">
+  </head>
+  <body>
+    <div class="header">
+      <div class="header-container">
+        <img src="./images/AF_LOGO.svg" alt="logo" class="logo" />
+      </div>
     </div>
-    <div class="column" style="text-align:right;">
-      <img src="../images/onelinklogo.png" alt="OneLink logo">
-    </div>
-  </div>
-  <h1 class="primary-heading">
-    OneLink Smart Script V2 Test Page
-  </h1>
-  <div class="url-container">
-    <div class="input_url-container">
-      <h2>Input URL</h2>
-      <textarea id="input_url" class="present_url" placeholder="Paste here your URL e.g. https://app.mypage.com/main.html?utm_source=mail&in_cmp=summersale"></textarea>
-    </div>
-    <div>
-      <textarea id="input_code_for_run" placeholder="Enter or drag your code here"></textarea>
-      <input type="button" value="Run Code" class="code_button" onclick="runTxtAreaCode()" />
-      <input type="button" value="Clear" class="code_button" onclick="clearInputs()" />
-    </div>
-    <div class="output_url-container">
-      <h2>Output URL</h2>
-      <textarea id="output_url" class="present_url">No output from script</textarea>
-    </div>
-  </div>
-  
-  <!-- <script type="text/javascript" src="../scripts/onelink-smart-script-latest.js"></script> -->
-  <script>
- 
-    // load the input URL to thr input_url textArea
-    if(sessionStorage.getItem('inUrl')){
-      document.getElementById('input_url').innerHTML = sessionStorage.getItem('inUrl');
-    }
-
-    if(sessionStorage.getItem('newScript')){
-      document.getElementById("input_code_for_run").value = sessionStorage.getItem('newScript'); 
-    }
+    <div class="container">
+      <h1 class="title"> Smart Script test page </h1>
+      <p class="sub-title">Test how your Smart Script uses an incoming URL to dynamically generate a unique outgoing URL.</p>
+      <section class="shadow-box">
+          <h4>Incoming URL</h4>          
+        <label for="input_url">Enter your incoming URL</label>
+        <input id="input_url" onBlur="success()" onkeyup="success()" class="incoming" type="text" name="input_url" placeholder="For exemple: https://app.mypage.com/main.html?utm_source=mail&in_cmp=summersale">
+        <span id="error-msg">Value should contain a valid url</span>
+        <div class="top-wrapper">
+          <h4 class="ss-title">Smart Script</h4>
+          <Button onclick="clearInputs()" id="clear-btn" class="clear-btn">Clear</Button>
+        </div>
+        <pre>
+          <textarea onBlur="success()" onkeyup="success()" id="input_code_for_run"  class="ss-code" placeholder="Enter the Smart Script code you created in the AppsFlyer dashboard."></textarea>
+        </pre>
+        <div id="error-code">Something went wrong..</div>
+        <Button onclick="runTxtAreaCode()" id="run-code-btn" class="run-code-btn">Run code</Button>
+      </section>
+      <section class="shadow-box">
+        <div class="output_url-container">
+          <h4>Outgoing URL</h4>
+          <input id="output_url" placeholder="Enter and run your Smart Script code to generate an outgoing URL."></input>
+        </div>
+      </section>
     
-    if(document.getElementById("input_code_for_run").value != '')
-    {
-      var headID = document.getElementsByTagName("head")[0];
+    </div>
+    <script>
+   
+     
+      // set the onClick to run the code in the code editor
+      function runTxtAreaCode() {
+try {
+          const inputUrl = new URL(document.getElementById("input_url").value);
+          const inSearch = inputUrl.search
+          const url = new URL(window.location);
+          url.search = inSearch;
+          // url.searchParams.set(inSearch);
+          window.history.pushState({}, '', url); 
+          var headID = document.getElementsByTagName("head")[0];
       var newScript = document.createElement("script");
       newScript.type = "text/javascript";
       newScript.textContent = document.getElementById("input_code_for_run").value.replaceAll(/<\/?script>/ig, "");
       headID.appendChild(newScript);
-
       var result_url;
-      if (typeof AF_SMART_SCRIPT_RESULT !== "undefined" ) {
+      if (typeof AF_SMART_SCRIPT_RESULT !== "undefined") {
         result_url = AF_SMART_SCRIPT_RESULT.clickURL;
       } else if (typeof result !== "undefined") {
         result_url = result.clickURL;
-      } else {
-        result_url  = "Something went wrong :(";
-      } 
-    }
-    document.getElementById('output_url').innerHTML  = result_url;
+      }else{
+        document.getElementById('error-code').style.display = 'block';
+        document.getElementById('input_code_for_run').style.borderColor = 'red';
+      }
 
-    function dropfile(file) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        input_code_for_run.value = e.target.result;
-      };
-      reader.readAsText(file, "UTF-8");
-    }
+      if(result_url){
+        document.getElementById("output_url").value=result_url
+      }
 
-    input_code_for_run.ondrop = function(e) {
-      e.preventDefault();
-      var file = e.dataTransfer.files[0];
-      dropfile(file);
-    };
+      if(document.getElementById("input_url").value==="" || document.getElementById("input_code_for_run").value==="" ) { 
+            document.getElementById('run-code-btn').disabled = true;
+        } else { 
+            document.getElementById('run-code-btn').disabled = false;
+        }
 
-    // set the onClick to run the code in the code editor
-    function runTxtAreaCode() {
-      let inUrl = new URL(document.getElementById("input_url").value);
-      let inSearch = inUrl.search;
+        if(document.getElementById("input_code_for_run").value==="") { 
+            document.getElementById('clear-btn').disabled = true;
+        }
+} catch (error) {
+  console.log("🚀 ~ file: index13.html ~ line 77 ~ runTxtAreaCode ~ error", error)
+  document.getElementById('error-code').style.display = 'block';
+        document.getElementById('input_code_for_run').style.borderColor = 'red';
+}
+
       
-      sessionStorage.setItem('newScript', document.getElementById("input_code_for_run").value);
-      sessionStorage.setItem('inUrl', inUrl);
-      let newUrl = new URL(window.location.href);
-      newUrl.search = inSearch;
-      window.location.assign(newUrl); 
-    };
+      };
 
-    function clearInputs() {
-      sessionStorage.removeItem('inUrl');
-      sessionStorage.removeItem('newScript');
-      window.location.href = window.location.pathname;  
-    };
+      function clearInputs() {
+        document.getElementById("input_code_for_run").value=""
+        document.getElementById("output_url").value=""
+        document.getElementById('clear-btn').disabled = true;
+        document.getElementById('error-code').style.display = 'none';
+        document.getElementById('input_code_for_run').style.borderColor = '#E5E8ED';
 
-  </script>
-</body>
+      };
 
-</body>
+      function success() {
+        if(!validURL(document.getElementById("input_url").value)){
+          document.getElementById('error-msg').style.display = 'block';
+          document.getElementById('input_url').style.borderColor = 'red';
+        }else{
+          document.getElementById('error-msg').style.display = 'none';
+          document.getElementById('input_url').style.borderColor = '#E5E8ED';
+        }
+        if((document.getElementById("input_url").value==="" || document.getElementById("input_code_for_run").value==="") || !validURL(document.getElementById("input_url").value)) { 
+            document.getElementById('run-code-btn').disabled = true;
+        } else { 
+            document.getElementById('run-code-btn').disabled = false;
+        }
+        if(document.getElementById("input_code_for_run").value==="") { 
+            document.getElementById('clear-btn').disabled = true;
+        } else { 
+            document.getElementById('clear-btn').disabled = false;
+        }
+        document.getElementById('error-code').style.display = 'none';
+        document.getElementById('input_code_for_run').style.borderColor = '#E5E8ED';
+    }
+    function validURL(str) {
+  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+  return !!pattern.test(str);
+}
+    </script>
+  </body>
+  </body>
 </html>
