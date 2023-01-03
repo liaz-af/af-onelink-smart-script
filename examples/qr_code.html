@@ -72,7 +72,7 @@
             result_url = result.clickURL;            
             document.getElementById('andrd_link').setAttribute('href', result_url);
             document.getElementById('ios_link').setAttribute('href', result_url);
-            window.AF_SMART_SCRIPT.displayQrCode("my_qr_code_div_id");
+            window.AF_SMART_SCRIPT.displayQrCode("my_qr_code_div_id", { logo: "https://files.readme.io/a0f6520-f01857e0762a00565bba4fb83097fbdf.jpg" , bgColor: "#1E90FF"});
             //The size of the QR code is defined in the CSS file under #my_qr_code_div_id
             // #my_qr_code_div_id canvas { 
             //  height: 200px;
@@ -102,7 +102,7 @@
         <img src="../images/play_store.png" alt="play store link">
     </a>
   </div>
-  <script type="text/javascript" src="../scripts/onelink-smart-script-latest.js"></script>
+  <script type="text/javascript" src="../scripts/onelink-smart-script-v2.2.1-liaz.js"></script>
   <script src="scripts/prism.js"></script>
   <script src="scripts/prism-line-numbers.js"></script>
   <script src="scripts/prism-live.js"></script>
