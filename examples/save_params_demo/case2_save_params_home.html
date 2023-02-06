@@ -57,17 +57,16 @@
     </div>
   </div>
   <h2 class="primary-heading">
-    Save Parameters demo
+    Save Parameters demo - Save from multiple pages
   </h2>
   <ul class="breadcrumb">
-    <li><a href="save_params_home.html">Home</a></li>
-    <li>Shoes</li>
+    <li>Home</li>
   </ul>
   <h1 class="secondary-heading">
-    Shoes page
+    Home page
   </h1>
   
-  <a href="./save_params_women_shoes.html"><button class="button">Women's Shoes</button></a>
+  <a href="./case2_save_params_shoes.html?utm_source=internal_source&utm_channel=internal_channel"><button class="button">Shoes</button></a>
 
   <div class="url-container">
     <div class="input_url-container">
@@ -83,9 +82,9 @@
       //Initializing Smart Script arguments
       var oneLinkURL = "https://engmntqa.onelink.me/LtRd/";
       // If a media source key is NOT FOUND on the link and NO default value is found, the script will return a null string 
-      var mediaSource = {keys: ["utm_source"], defaultValue: "NOOO_default_source"};
-      var channel = {keys: ["utm_channel"]};
-      var deepLinkValue = {keys: ["dp_dest"], defaultValue: "peaches"};
+      var mediaSource = {keys: ["utm_source"], defaultValue: "NOOO_media_source"};
+      var channel = {keys: ["utm_channel"], defaultValue: "NOOO_channel"};
+      var deepLinkValue = {keys: ["dp_dest"], defaultValue: "shop_view"};
 
       //Calling the function after embedding the code will be through a global parameter on the window object called window.AF_SMART_SCRIPT
       //Onelink URL is generated
@@ -100,8 +99,8 @@
       
       var result_url = "No output from script"
       if (result) {
-            result_url = result.clickURL;            
-            }      
+            result_url = result.clickURL;
+      }            
       document.getElementById('output_url').innerHTML = result_url;
       
       </textarea>
