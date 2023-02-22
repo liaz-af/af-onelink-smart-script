@@ -2,7 +2,7 @@
  * AF Smart Script (Build 1.0.0-console)
  */
 
-function ownKeys(object, enumerableOnly) {
+ function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
 
   if (Object.getOwnPropertySymbols) {
@@ -172,7 +172,7 @@ var isUACHSupported = function isUACHSupported() {
   return (typeof navigator === "undefined" ? "undefined" : _typeof(navigator)) === 'object' && 'userAgentData' in navigator && 'getHighEntropyValues' in navigator.userAgentData && !isIOS(navigator && navigator.userAgent);
 };
 
-var validateOneLinkURL = function validateOneLinkURL(oneLinkURL) {
+var isOneLinkURLValid = function isOneLinkURLValid(oneLinkURL) {
   var _ref;
 
   var oneLinkURLParts = (_ref = oneLinkURL || '') === null || _ref === void 0 ? void 0 : _ref.toString().match(AF_URL_SCHEME);
@@ -185,22 +185,27 @@ var validateOneLinkURL = function validateOneLinkURL(oneLinkURL) {
   return true;
 };
 
-var validateSkipAndMs = function validateSkipAndMs(_ref2) {
+var validatedMs = function validatedMs(_ref2) {
   var _mediaSource$keys;
 
   var _ref2$mediaSource = _ref2.mediaSource,
       mediaSource = _ref2$mediaSource === void 0 ? {
     keys: []
-  } : _ref2$mediaSource,
-      _ref2$referrerSkipLis = _ref2.referrerSkipList,
-      referrerSkipList = _ref2$referrerSkipLis === void 0 ? [] : _ref2$referrerSkipLis,
-      _ref2$urlSkipList = _ref2.urlSkipList,
-      urlSkipList = _ref2$urlSkipList === void 0 ? [] : _ref2$urlSkipList;
+  } : _ref2$mediaSource;
 
   if ((mediaSource === null || mediaSource === void 0 ? void 0 : (_mediaSource$keys = mediaSource.keys) === null || _mediaSource$keys === void 0 ? void 0 : _mediaSource$keys.length) === 0 && !(mediaSource !== null && mediaSource !== void 0 && mediaSource.defaultValue)) {
     console.error("mediaSource is missing (default value was not supplied), can't generate URL", mediaSource);
     return null;
   }
+
+  return true;
+};
+
+var validateSkips = function validateSkips(_ref3) {
+  var _ref3$referrerSkipLis = _ref3.referrerSkipList,
+      referrerSkipList = _ref3$referrerSkipLis === void 0 ? [] : _ref3$referrerSkipLis,
+      _ref3$urlSkipList = _ref3.urlSkipList,
+      urlSkipList = _ref3$urlSkipList === void 0 ? [] : _ref3$urlSkipList;
 
   if (isSkippedURL({
     url: document.referrer,
@@ -221,12 +226,12 @@ var validateSkipAndMs = function validateSkipAndMs(_ref2) {
   return true;
 };
 
-var extractCustomParams = function extractCustomParams(_ref3) {
-  var _ref3$afCustom = _ref3.afCustom,
-      afCustom = _ref3$afCustom === void 0 ? [] : _ref3$afCustom,
-      _ref3$currentURLParam = _ref3.currentURLParams,
-      currentURLParams = _ref3$currentURLParam === void 0 ? {} : _ref3$currentURLParam,
-      googleClickIdKey = _ref3.googleClickIdKey;
+var extractCustomParams = function extractCustomParams(_ref4) {
+  var _ref4$afCustom = _ref4.afCustom,
+      afCustom = _ref4$afCustom === void 0 ? [] : _ref4$afCustom,
+      _ref4$currentURLParam = _ref4.currentURLParams,
+      currentURLParams = _ref4$currentURLParam === void 0 ? {} : _ref4$currentURLParam,
+      googleClickIdKey = _ref4.googleClickIdKey;
   var afParams = {};
 
   if (Array.isArray(afCustom)) {
@@ -251,7 +256,7 @@ var extractCustomParams = function extractCustomParams(_ref3) {
 var validateAndMappedParams = function validateAndMappedParams() {
   var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var currentURLParams = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var isConsole = arguments.length > 2 ? arguments[2] : undefined;
+  var validateParamsForDirectClick = arguments.length > 2 ? arguments[2] : undefined;
   var mediaSource = params.mediaSource,
       campaign = params.campaign,
       channel = params.channel,
@@ -275,19 +280,19 @@ var validateAndMappedParams = function validateAndMappedParams() {
       return null;
     }
 
-    var constPidParam = isConsole ? 'af_media_source' : 'pid';
+    var constPidParam = validateParamsForDirectClick ? 'af_media_source' : 'pid';
     afParams[constPidParam] = pidValue;
   }
 
   if (campaign) {
     var campaignValue = getParameterValue(currentURLParams, campaign);
 
-    if (!campaignValue && isConsole) {
+    if (!campaignValue && validateParamsForDirectClick) {
       console.error("campaign was not found in the URL and default value was not supplied, can't generate URL", campaign);
       return null;
     }
 
-    if (isConsole) {
+    if (validateParamsForDirectClick) {
       afParams['af_campaign'] = campaignValue;
       afParams['af_campaign_id'] = campaignValue;
     } else {
@@ -339,6 +344,22 @@ var validateAndMappedParams = function validateAndMappedParams() {
   return _objectSpread2(_objectSpread2({}, afParams), customParams);
 };
 
+var validatePlatform = function validatePlatform(platform) {
+  if (!platform) {
+    console.error("platform is missing , can't generate URL", platform);
+    return null;
+  }
+
+  var platforms = ['smartcast', 'tizen', 'roku', 'webos', 'vidaa', 'playstation', 'android', 'ios', 'steam', 'quest', 'battlenet'];
+
+  if (!platforms.includes(platform)) {
+    console.error('platform need to be part of the known platforms supoorted');
+    return null;
+  }
+
+  return true;
+};
+
 /**
  * EasyQRCodeJS
  *
@@ -361,19 +382,19 @@ var validateAndMappedParams = function validateAndMappedParams() {
 function QRCode() {
 
   var undefined$1;
-  /** Node.js global 检测. */
+  /** Node.js global æ£€æµ‹. */
 
   var freeGlobal = (typeof global === "undefined" ? "undefined" : _typeof(global)) == 'object' && global && global.Object === Object && global;
-  /** `self` 变量检测. */
+  /** `self` å˜é‡æ£€æµ‹. */
 
   var freeSelf = (typeof self === "undefined" ? "undefined" : _typeof(self)) == 'object' && self && self.Object === Object && self;
-  /** 全局对象检测. */
+  /** å…¨å±€å¯¹è±¡æ£€æµ‹. */
 
   var root = freeGlobal || freeSelf || Function('return this')();
-  /** `exports` 变量检测. */
+  /** `exports` å˜é‡æ£€æµ‹. */
 
   var freeExports = (typeof exports === "undefined" ? "undefined" : _typeof(exports)) == 'object' && exports && !exports.nodeType && exports;
-  /** `module` 变量检测. */
+  /** `module` å˜é‡æ£€æµ‹. */
 
   var freeModule = freeExports && (typeof module === "undefined" ? "undefined" : _typeof(module)) == 'object' && module && !module.nodeType && module;
   var _QRCode = root.QRCode;
@@ -2353,19 +2374,21 @@ function getUserAgentData() {
         referrerSkipList = _parameters$referrerS === void 0 ? [] : _parameters$referrerS,
         _parameters$urlSkipLi = parameters.urlSkipList,
         urlSkipList = _parameters$urlSkipLi === void 0 ? [] : _parameters$urlSkipLi;
-    if (!validateOneLinkURL(oneLinkURL)) return null;
-    if (!validateSkipAndMs({
-      mediaSource: mediaSource,
+    if (!isOneLinkURLValid(oneLinkURL)) return null;
+    if (!validateSkips({
       referrerSkipList: referrerSkipList,
       urlSkipList: urlSkipList
+    })) return null;
+    if (!validatedMs({
+      mediaSource: mediaSource
     })) return null;
     var currentURLParams = getURLParametersKV(window.location.search);
     var afParams = validateAndMappedParams(parameters.afParameters, currentURLParams);
     if (!afParams) return null;
     afParams.af_js_web = true;
     afParams.af_ss_ver = window.AF_SMART_SCRIPT.version;
-    var finalParams = stringifyParameters(afParams);
-    var finalURL = oneLinkURL + finalParams.replace('&', '?');
+    var finalParams = stringifyParameters(afParams).replace('&', '?');
+    var finalURL = oneLinkURL + finalParams;
     console.debug('Generated OneLink URL', finalURL);
 
     window.AF_SMART_SCRIPT.displayQrCode = function (htmlId) {
@@ -2418,8 +2441,7 @@ function getUserAgentData() {
     return {
       clickURL: finalURL
     };
-  }; // const generateDirectClickURL = (parameters = {
-
+  };
 
   var generateDirectClickURL = function generateDirectClickURL() {
     var _campaign$keys;
@@ -2439,7 +2461,7 @@ function getUserAgentData() {
         app_id = parameters.app_id,
         redirectURL = parameters.redirectURL;
     var mediaSource = afParameters.mediaSource,
-        campaign = afParameters.campaign; // const { mediaSource = { keys: [] } } = afParameters;
+        campaign = afParameters.campaign;
 
     if (!mediaSource) {
       console.error("mediaSource is missing , can't generate URL", mediaSource);
@@ -2448,11 +2470,6 @@ function getUserAgentData() {
 
     if (!campaign) {
       console.error("campaign  is missing , can't generate URL", campaign);
-      return null;
-    }
-
-    if (!platform) {
-      console.error("platform is missing , can't generate URL", platform);
       return null;
     }
 
@@ -2466,12 +2483,8 @@ function getUserAgentData() {
       return null;
     }
 
-    var platforms = ['smartcast', 'tizen', 'roku', 'webos', 'vidaa', 'playstation', 'android', 'ios', 'steam', 'quest', 'battlenet'];
-
-    if (!platforms.includes(platform)) {
-      console.error('platform need to be part of the known platforms supoorted');
-      return null;
-    }
+    var isPlatformValid = validatePlatform(platform);
+    if (!isPlatformValid) return null;
 
     if (typeof app_id !== 'string') {
       console.error('app_id must be a string');
@@ -2483,18 +2496,20 @@ function getUserAgentData() {
       return null;
     }
 
-    if (!validateSkipAndMs({
-      mediaSource: mediaSource,
+    if (!validateSkips({
       referrerSkipList: referrerSkipList,
       urlSkipList: urlSkipList
+    })) return null;
+    if (!validatedMs({
+      mediaSource: mediaSource
     })) return null;
     var currentURLParams = getURLParametersKV(window.location.search);
     var afParams = validateAndMappedParams(afParameters, currentURLParams, true);
     if (!afParams) return null;
     afParams.af_js_web = true;
     afParams.af_ss_ver = window.AF_SMART_SCRIPT.version;
-    var finalParams = stringifyParameters(afParams);
-    var finalURL = "https://engagements.appsflyer.com/v1.0/c2s/click/app/".concat(platform, "/").concat(app_id).concat(finalParams.replace('&', '?'), "&af_r=").concat(encodeURIComponent(redirectURL));
+    var finalParams = stringifyParameters(afParams).replace('&', '?');
+    var finalURL = "https://engagements.appsflyer.com/v1.0/c2s/click/app/".concat(platform, "/").concat(app_id).concat(finalParams, "&af_r=").concat(encodeURIComponent(redirectURL));
     console.debug('generate Direct Click URL', finalURL);
     return {
       clickURL: finalURL
