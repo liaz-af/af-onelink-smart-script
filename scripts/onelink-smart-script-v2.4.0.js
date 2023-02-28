@@ -1,8 +1,8 @@
 /**
- * AF Smart Script (Build 1.0.0-console)
+ * AF Smart Script (Build 2.4.0)
  */
 
- function ownKeys(object, enumerableOnly) {
+function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
 
   if (Object.getOwnPropertySymbols) {
@@ -179,40 +179,37 @@ var isOneLinkURLValid = function isOneLinkURLValid(oneLinkURL) {
 
   if (!oneLinkURLParts || (oneLinkURLParts === null || oneLinkURLParts === void 0 ? void 0 : oneLinkURLParts.length) < VALID_AF_URL_PARTS_LENGTH) {
     console.error("oneLinkURL is missing or not in the correct format, can't generate URL", oneLinkURL);
-    return null;
+    return false;
   }
 
   return true;
 };
 
-var validatedMs = function validatedMs(_ref2) {
+var validatedMs = function validatedMs() {
   var _mediaSource$keys;
 
-  var _ref2$mediaSource = _ref2.mediaSource,
-      mediaSource = _ref2$mediaSource === void 0 ? {
-    keys: []
-  } : _ref2$mediaSource;
+  var mediaSource = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
   if ((mediaSource === null || mediaSource === void 0 ? void 0 : (_mediaSource$keys = mediaSource.keys) === null || _mediaSource$keys === void 0 ? void 0 : _mediaSource$keys.length) === 0 && !(mediaSource !== null && mediaSource !== void 0 && mediaSource.defaultValue)) {
     console.error("mediaSource is missing (default value was not supplied), can't generate URL", mediaSource);
-    return null;
+    return false;
   }
 
   return true;
 };
 
-var validateSkips = function validateSkips(_ref3) {
-  var _ref3$referrerSkipLis = _ref3.referrerSkipList,
-      referrerSkipList = _ref3$referrerSkipLis === void 0 ? [] : _ref3$referrerSkipLis,
-      _ref3$urlSkipList = _ref3.urlSkipList,
-      urlSkipList = _ref3$urlSkipList === void 0 ? [] : _ref3$urlSkipList;
+var isSkipListsValid = function isSkipListsValid(_ref2) {
+  var _ref2$referrerSkipLis = _ref2.referrerSkipList,
+      referrerSkipList = _ref2$referrerSkipLis === void 0 ? [] : _ref2$referrerSkipLis,
+      _ref2$urlSkipList = _ref2.urlSkipList,
+      urlSkipList = _ref2$urlSkipList === void 0 ? [] : _ref2$urlSkipList;
 
   if (isSkippedURL({
     url: document.referrer,
     skipKeys: referrerSkipList,
     errorMsg: 'Generate url is skipped. HTTP referrer contains key:'
   })) {
-    return null;
+    return false;
   }
 
   if (isSkippedURL({
@@ -220,18 +217,18 @@ var validateSkips = function validateSkips(_ref3) {
     skipKeys: urlSkipList,
     errorMsg: 'Generate url is skipped. URL contains string:'
   })) {
-    return null;
+    return false;
   }
 
   return true;
 };
 
-var extractCustomParams = function extractCustomParams(_ref4) {
-  var _ref4$afCustom = _ref4.afCustom,
-      afCustom = _ref4$afCustom === void 0 ? [] : _ref4$afCustom,
-      _ref4$currentURLParam = _ref4.currentURLParams,
-      currentURLParams = _ref4$currentURLParam === void 0 ? {} : _ref4$currentURLParam,
-      googleClickIdKey = _ref4.googleClickIdKey;
+var extractCustomParams = function extractCustomParams(_ref3) {
+  var _ref3$afCustom = _ref3.afCustom,
+      afCustom = _ref3$afCustom === void 0 ? [] : _ref3$afCustom,
+      _ref3$currentURLParam = _ref3.currentURLParams,
+      currentURLParams = _ref3$currentURLParam === void 0 ? {} : _ref3$currentURLParam,
+      googleClickIdKey = _ref3.googleClickIdKey;
   var afParams = {};
 
   if (Array.isArray(afCustom)) {
@@ -256,7 +253,7 @@ var extractCustomParams = function extractCustomParams(_ref4) {
 var validateAndMappedParams = function validateAndMappedParams() {
   var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var currentURLParams = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var validateParamsForDirectClick = arguments.length > 2 ? arguments[2] : undefined;
+  var isDirectClick = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
   var mediaSource = params.mediaSource,
       campaign = params.campaign,
       channel = params.channel,
@@ -280,19 +277,19 @@ var validateAndMappedParams = function validateAndMappedParams() {
       return null;
     }
 
-    var constPidParam = validateParamsForDirectClick ? 'af_media_source' : 'pid';
-    afParams[constPidParam] = pidValue;
+    var pidParamKey = isDirectClick ? 'af_media_source' : 'pid';
+    afParams[pidParamKey] = pidValue;
   }
 
   if (campaign) {
     var campaignValue = getParameterValue(currentURLParams, campaign);
 
-    if (!campaignValue && validateParamsForDirectClick) {
+    if (!campaignValue && isDirectClick) {
       console.error("campaign was not found in the URL and default value was not supplied, can't generate URL", campaign);
       return null;
     }
 
-    if (validateParamsForDirectClick) {
+    if (isDirectClick) {
       afParams['af_campaign'] = campaignValue;
       afParams['af_campaign_id'] = campaignValue;
     } else {
@@ -344,17 +341,17 @@ var validateAndMappedParams = function validateAndMappedParams() {
   return _objectSpread2(_objectSpread2({}, afParams), customParams);
 };
 
-var validatePlatform = function validatePlatform(platform) {
+var isPlatformValid = function isPlatformValid(platform) {
   if (!platform) {
     console.error("platform is missing , can't generate URL", platform);
-    return null;
+    return false;
   }
 
   var platforms = ['smartcast', 'tizen', 'roku', 'webos', 'vidaa', 'playstation', 'android', 'ios', 'steam', 'quest', 'battlenet'];
 
   if (!platforms.includes(platform)) {
     console.error('platform need to be part of the known platforms supoorted');
-    return null;
+    return false;
   }
 
   return true;
@@ -382,19 +379,19 @@ var validatePlatform = function validatePlatform(platform) {
 function QRCode() {
 
   var undefined$1;
-  /** Node.js global æ£€æµ‹. */
+  /** Node.js global 检测. */
 
   var freeGlobal = (typeof global === "undefined" ? "undefined" : _typeof(global)) == 'object' && global && global.Object === Object && global;
-  /** `self` å˜é‡æ£€æµ‹. */
+  /** `self` 变量检测. */
 
   var freeSelf = (typeof self === "undefined" ? "undefined" : _typeof(self)) == 'object' && self && self.Object === Object && self;
-  /** å…¨å±€å¯¹è±¡æ£€æµ‹. */
+  /** 全局对象检测. */
 
   var root = freeGlobal || freeSelf || Function('return this')();
-  /** `exports` å˜é‡æ£€æµ‹. */
+  /** `exports` 变量检测. */
 
   var freeExports = (typeof exports === "undefined" ? "undefined" : _typeof(exports)) == 'object' && exports && !exports.nodeType && exports;
-  /** `module` å˜é‡æ£€æµ‹. */
+  /** `module` 变量检测. */
 
   var freeModule = freeExports && (typeof module === "undefined" ? "undefined" : _typeof(module)) == 'object' && module && !module.nodeType && module;
   var _QRCode = root.QRCode;
@@ -2338,7 +2335,7 @@ function QRCode() {
   }
 }
 
-var version = "1.0.0-console";
+var version = "2.4.0";
 
 var formatVersion = version.replace(/\./g, '_'); //replace . with _
 
@@ -2375,18 +2372,20 @@ function getUserAgentData() {
         _parameters$urlSkipLi = parameters.urlSkipList,
         urlSkipList = _parameters$urlSkipLi === void 0 ? [] : _parameters$urlSkipLi;
     if (!isOneLinkURLValid(oneLinkURL)) return null;
-    if (!validateSkips({
+    if (!isSkipListsValid({
       referrerSkipList: referrerSkipList,
       urlSkipList: urlSkipList
     })) return null;
-    if (!validatedMs({
-      mediaSource: mediaSource
-    })) return null;
+    if (!validatedMs(mediaSource)) return null;
     var currentURLParams = getURLParametersKV(window.location.search);
-    var afParams = validateAndMappedParams(parameters.afParameters, currentURLParams);
-    if (!afParams) return null;
-    afParams.af_js_web = true;
-    afParams.af_ss_ver = window.AF_SMART_SCRIPT.version;
+    var validParams = validateAndMappedParams(parameters.afParameters, currentURLParams);
+    if (!validParams) return null;
+
+    var afParams = _objectSpread2({
+      af_js_web: true,
+      af_ss_ver: window.AF_SMART_SCRIPT.version
+    }, validParams);
+
     var finalParams = stringifyParameters(afParams).replace('&', '?');
     var finalURL = oneLinkURL + finalParams;
     console.debug('Generated OneLink URL', finalURL);
@@ -2483,8 +2482,7 @@ function getUserAgentData() {
       return null;
     }
 
-    var isPlatformValid = validatePlatform(platform);
-    if (!isPlatformValid) return null;
+    if (!isPlatformValid(platform)) return null;
 
     if (typeof app_id !== 'string') {
       console.error('app_id must be a string');
@@ -2496,21 +2494,26 @@ function getUserAgentData() {
       return null;
     }
 
-    if (!validateSkips({
+    if (!isSkipListsValid({
       referrerSkipList: referrerSkipList,
       urlSkipList: urlSkipList
     })) return null;
-    if (!validatedMs({
-      mediaSource: mediaSource
-    })) return null;
+    if (!validatedMs(mediaSource)) return null;
     var currentURLParams = getURLParametersKV(window.location.search);
-    var afParams = validateAndMappedParams(afParameters, currentURLParams, true);
-    if (!afParams) return null;
-    afParams.af_js_web = true;
-    afParams.af_ss_ver = window.AF_SMART_SCRIPT.version;
+    var validParams = validateAndMappedParams(parameters.afParameters, currentURLParams, true);
+    if (!validParams) return null;
+
+    var afParams = _objectSpread2({
+      af_js_web: true,
+      af_ss_ver: window.AF_SMART_SCRIPT.version
+    }, validParams);
+
     var finalParams = stringifyParameters(afParams).replace('&', '?');
-    var finalURL = "https://engagements.appsflyer.com/v1.0/c2s/click/app/".concat(platform, "/").concat(app_id).concat(finalParams, "&af_r=").concat(encodeURIComponent(redirectURL));
+    var clickBaseUrl = 'https://engagements.appsflyer.com/v1.0/c2s/click/app';
+    var finalURL = "".concat(clickBaseUrl, "/").concat(platform, "/").concat(app_id).concat(finalParams, "&af_r=").concat(encodeURIComponent(redirectURL));
     console.debug('generate Direct Click URL', finalURL);
+    delete window.AF_SMART_SCRIPT.displayQrCode;
+    delete window.AF_SMART_SCRIPT.fireImpressionsLink;
     return {
       clickURL: finalURL
     };

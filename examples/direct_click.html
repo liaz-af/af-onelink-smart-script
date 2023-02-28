@@ -63,14 +63,14 @@
         },
         platform: 'steam',
         app_id: '123456',
-        redirectURL:'https%3A%2F%2Fstore.steampowered.com%2Fapp%2F440%2FTeam_Fortress_2%2F'
+        redirectURL:'https://store.steampowered.com/app/440/Team_Fortress_2/'
       })
       
       var result_url = "No output from script"
       if (result) {
             result_url = result.clickURL;            
       }      
-      document.getElementById('output_url').innerHTML = result_url;
+      document.getElementById('output_url').textContent = result_url;
       
       </textarea>
   </pre>
@@ -83,14 +83,14 @@
       </textarea>
     </div>
   </div>
-  <script type="text/javascript" src="../scripts/onelink-smart-script-v1.0.0-console.js"></script>
+  <script type="text/javascript" src="../scripts/onelink-smart-script-v2.4.0.js"></script>
   <script src="scripts/prism.js"></script>
   <script src="scripts/prism-line-numbers.js"></script>
   <script src="scripts/prism-live.js"></script>
   <script>
 
     // load the input URL to thr input_url textArea
-    document.getElementById('input_url').innerHTML = window.location.href;
+    document.getElementById('input_url').textContent = window.location.href;
     runTxtAreaCode();
 
     // set the onClicke to run the code in the code editor
