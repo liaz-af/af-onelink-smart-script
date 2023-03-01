@@ -1,14 +1,32 @@
 /**
- * AF Smart Script (Build 2.3.0)
+ * AF Smart Script (Build 2.4.0)
  */
 
-var AF_URL_SCHEME = '(https:\\/\\/)(([^\\.]+).)(.*\\/)(.*)';
-var VALID_AF_URL_PARTS_LENGTH = 5;
-var GOOGLE_CLICK_ID = 'gclid';
-var ASSOCIATED_AD_KEYWORD = 'keyword';
-var AF_KEYWORDS = 'af_keywords';
-var AF_CUSTOM_EXCLUDE_PARAMS_KEYS = ['pid', 'c', 'af_channel', 'af_ad', 'af_adset', 'deep_link_value', 'af_sub1', 'af_sub2', 'af_sub3', 'af_sub4', 'af_sub5'];
-var GCLID_EXCLUDE_PARAMS_KEYS = ['pid', 'c', 'af_channel', 'af_ad', 'af_adset', 'deep_link_value'];
+ function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    enumerableOnly && (symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    })), keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = null != arguments[i] ? arguments[i] : {};
+    i % 2 ? ownKeys(Object(source), !0).forEach(function (key) {
+      _defineProperty(target, key, source[key]);
+    }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) {
+      Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+    });
+  }
+
+  return target;
+}
 
 function _typeof(obj) {
   "@babel/helpers - typeof";
@@ -19,6 +37,70 @@ function _typeof(obj) {
     return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
   }, _typeof(obj);
 }
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+var AF_URL_SCHEME = '(https:\\/\\/)(([^\\.]+).)(.*\\/)(.*)';
+var VALID_AF_URL_PARTS_LENGTH = 5;
+var GOOGLE_CLICK_ID = 'gclid';
+var ASSOCIATED_AD_KEYWORD = 'keyword';
+var AF_KEYWORDS = 'af_keywords';
+var AF_CUSTOM_EXCLUDE_PARAMS_KEYS = ['pid', 'c', 'af_channel', 'af_ad', 'af_adset', 'deep_link_value', 'af_sub1', 'af_sub2', 'af_sub3', 'af_sub4', 'af_sub5'];
+var GCLID_EXCLUDE_PARAMS_KEYS = ['pid', 'c', 'af_channel', 'af_ad', 'af_adset', 'deep_link_value'];
+
+var isSkippedURL = function isSkippedURL(_ref) {
+  var url = _ref.url,
+      skipKeys = _ref.skipKeys,
+      errorMsg = _ref.errorMsg;
+
+  // search if this page referred and contains one of the given keys
+  if (url) {
+    var lowerURL = url.toLowerCase();
+
+    if (lowerURL) {
+      var skipKey = skipKeys.find(function (key) {
+        return lowerURL.includes(key.toLowerCase());
+      });
+      !!skipKey && console.debug(errorMsg, skipKey);
+      return !!skipKey;
+    }
+  }
+
+  return false;
+};
+
+var getGoogleClickIdParameters = function getGoogleClickIdParameters(gciKey, currentURLParams) {
+  var gciParam = currentURLParams[GOOGLE_CLICK_ID];
+  var result = {};
+
+  if (gciParam) {
+    console.debug('This user comes from Google AdWords');
+    result[gciKey] = gciParam;
+    var keywordParam = currentURLParams[ASSOCIATED_AD_KEYWORD];
+
+    if (keywordParam) {
+      console.debug('There is a keyword associated with the ad');
+      result[AF_KEYWORDS] = keywordParam;
+    }
+  } else {
+    console.debug('This user comes from SRN or custom network');
+  }
+
+  return result;
+};
 
 var stringifyParameters = function stringifyParameters() {
   var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -90,45 +172,189 @@ var isUACHSupported = function isUACHSupported() {
   return (typeof navigator === "undefined" ? "undefined" : _typeof(navigator)) === 'object' && 'userAgentData' in navigator && 'getHighEntropyValues' in navigator.userAgentData && !isIOS(navigator && navigator.userAgent);
 };
 
-var isSkippedURL = function isSkippedURL(_ref) {
-  var url = _ref.url,
-      skipKeys = _ref.skipKeys,
-      errorMsg = _ref.errorMsg;
+var isOneLinkURLValid = function isOneLinkURLValid(oneLinkURL) {
+  var _ref;
 
-  // search if this page referred and contains one of the given keys
-  if (url) {
-    var lowerURL = url.toLowerCase();
+  var oneLinkURLParts = (_ref = oneLinkURL || '') === null || _ref === void 0 ? void 0 : _ref.toString().match(AF_URL_SCHEME);
 
-    if (lowerURL) {
-      var skipKey = skipKeys.find(function (key) {
-        return lowerURL.includes(key.toLowerCase());
-      });
-      !!skipKey && console.debug(errorMsg, skipKey);
-      return !!skipKey;
-    }
+  if (!oneLinkURLParts || (oneLinkURLParts === null || oneLinkURLParts === void 0 ? void 0 : oneLinkURLParts.length) < VALID_AF_URL_PARTS_LENGTH) {
+    console.error("oneLinkURL is missing or not in the correct format, can't generate URL", oneLinkURL);
+    return false;
   }
 
-  return false;
+  return true;
 };
 
-var getGoogleClickIdParameters = function getGoogleClickIdParameters(gciKey, currentURLParams) {
-  var gciParam = currentURLParams[GOOGLE_CLICK_ID];
-  var result = {};
+var validatedMs = function validatedMs() {
+  var _mediaSource$keys;
 
-  if (gciParam) {
-    console.debug('This user comes from Google AdWords');
-    result[gciKey] = gciParam;
-    var keywordParam = currentURLParams[ASSOCIATED_AD_KEYWORD];
+  var mediaSource = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-    if (keywordParam) {
-      console.debug('There is a keyword associated with the ad');
-      result[AF_KEYWORDS] = keywordParam;
-    }
-  } else {
-    console.debug('This user comes from SRN or custom network');
+  if ((mediaSource === null || mediaSource === void 0 ? void 0 : (_mediaSource$keys = mediaSource.keys) === null || _mediaSource$keys === void 0 ? void 0 : _mediaSource$keys.length) === 0 && !(mediaSource !== null && mediaSource !== void 0 && mediaSource.defaultValue)) {
+    console.error("mediaSource is missing (default value was not supplied), can't generate URL", mediaSource);
+    return false;
   }
 
-  return result;
+  return true;
+};
+
+var isSkipListsValid = function isSkipListsValid(_ref2) {
+  var _ref2$referrerSkipLis = _ref2.referrerSkipList,
+      referrerSkipList = _ref2$referrerSkipLis === void 0 ? [] : _ref2$referrerSkipLis,
+      _ref2$urlSkipList = _ref2.urlSkipList,
+      urlSkipList = _ref2$urlSkipList === void 0 ? [] : _ref2$urlSkipList;
+
+  if (isSkippedURL({
+    url: document.referrer,
+    skipKeys: referrerSkipList,
+    errorMsg: 'Generate url is skipped. HTTP referrer contains key:'
+  })) {
+    return false;
+  }
+
+  if (isSkippedURL({
+    url: document.URL,
+    skipKeys: urlSkipList,
+    errorMsg: 'Generate url is skipped. URL contains string:'
+  })) {
+    return false;
+  }
+
+  return true;
+};
+
+var extractCustomParams = function extractCustomParams(_ref3) {
+  var _ref3$afCustom = _ref3.afCustom,
+      afCustom = _ref3$afCustom === void 0 ? [] : _ref3$afCustom,
+      _ref3$currentURLParam = _ref3.currentURLParams,
+      currentURLParams = _ref3$currentURLParam === void 0 ? {} : _ref3$currentURLParam,
+      googleClickIdKey = _ref3.googleClickIdKey;
+  var afParams = {};
+
+  if (Array.isArray(afCustom)) {
+    afCustom.forEach(function (customParam) {
+      if (customParam !== null && customParam !== void 0 && customParam.paramKey) {
+        var isOverrideExistingKey = AF_CUSTOM_EXCLUDE_PARAMS_KEYS.find(function (k) {
+          return k === (customParam === null || customParam === void 0 ? void 0 : customParam.paramKey);
+        });
+
+        if ((customParam === null || customParam === void 0 ? void 0 : customParam.paramKey) === googleClickIdKey || isOverrideExistingKey) {
+          console.debug("Custom parameter ParamKey can't override Google-Click-Id or AF Parameters keys", customParam);
+        } else {
+          afParams[customParam.paramKey] = getParameterValue(currentURLParams, customParam);
+        }
+      }
+    });
+  }
+
+  return afParams;
+};
+
+var validateAndMappedParams = function validateAndMappedParams() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var currentURLParams = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var isDirectClick = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+  var mediaSource = params.mediaSource,
+      campaign = params.campaign,
+      channel = params.channel,
+      ad = params.ad,
+      adSet = params.adSet,
+      deepLinkValue = params.deepLinkValue,
+      afSub1 = params.afSub1,
+      afSub2 = params.afSub2,
+      afSub3 = params.afSub3,
+      afSub4 = params.afSub4,
+      afSub5 = params.afSub5,
+      afCustom = params.afCustom,
+      googleClickIdKey = params.googleClickIdKey;
+  var afParams = {}; // Validates the URL and returns `true` if it should be skipped, `false` otherwise.
+
+  if (mediaSource) {
+    var pidValue = getParameterValue(currentURLParams, mediaSource);
+
+    if (!pidValue) {
+      console.error("mediaSource was not found in the URL and default value was not supplied, can't generate URL", mediaSource);
+      return null;
+    }
+
+    var pidParamKey = isDirectClick ? 'af_media_source' : 'pid';
+    afParams[pidParamKey] = pidValue;
+  }
+
+  if (campaign) {
+    var campaignValue = getParameterValue(currentURLParams, campaign);
+
+    if (!campaignValue && isDirectClick) {
+      console.error("campaign was not found in the URL and default value was not supplied, can't generate URL", campaign);
+      return null;
+    }
+
+    if (isDirectClick) {
+      afParams['af_campaign'] = campaignValue;
+      afParams['af_campaign_id'] = campaignValue;
+    } else {
+      afParams['c'] = campaignValue;
+    }
+  }
+
+  if (channel) {
+    afParams['af_channel'] = getParameterValue(currentURLParams, channel);
+  }
+
+  if (ad) {
+    afParams['af_ad'] = getParameterValue(currentURLParams, ad);
+  }
+
+  if (adSet) {
+    afParams['af_adset'] = getParameterValue(currentURLParams, adSet);
+  }
+
+  if (deepLinkValue) {
+    afParams['deep_link_value'] = getParameterValue(currentURLParams, deepLinkValue);
+  }
+
+  var afSubs = [afSub1, afSub2, afSub3, afSub4, afSub5];
+  afSubs.forEach(function (afSub, index) {
+    if (afSub) {
+      afParams["af_sub".concat(index + 1)] = getParameterValue(currentURLParams, afSub);
+    }
+  });
+
+  if (googleClickIdKey) {
+    if (GCLID_EXCLUDE_PARAMS_KEYS.find(function (k) {
+      return k === googleClickIdKey;
+    })) {
+      console.debug("Google Click Id ParamKey can't override AF Parameters keys", googleClickIdKey);
+    } else {
+      var googleParameters = getGoogleClickIdParameters(googleClickIdKey, currentURLParams);
+      Object.keys(googleParameters).forEach(function (gpk) {
+        afParams[gpk] = googleParameters[gpk];
+      });
+    }
+  }
+
+  var customParams = extractCustomParams({
+    afCustom: afCustom,
+    currentURLParams: currentURLParams,
+    googleClickIdKey: googleClickIdKey
+  });
+  return _objectSpread2(_objectSpread2({}, afParams), customParams);
+};
+
+var isPlatformValid = function isPlatformValid(platform) {
+  if (!platform) {
+    console.error("platform is missing , can't generate URL", platform);
+    return false;
+  }
+
+  var platforms = ['smartcast', 'tizen', 'roku', 'webos', 'vidaa', 'playstation', 'android', 'ios', 'steam', 'quest', 'battlenet'];
+
+  if (!platforms.includes(platform)) {
+    console.error('platform need to be part of the known platforms supoorted');
+    return false;
+  }
+
+  return true;
 };
 
 /**
@@ -2109,7 +2335,7 @@ function QRCode() {
   }
 }
 
-var version = "2.3.0";
+var version = "2.4.0";
 
 var formatVersion = version.replace(/\./g, '_'); //replace . with _
 
@@ -2134,8 +2360,6 @@ function getUserAgentData() {
 
 (function () {
   var generateOneLinkURL = function generateOneLinkURL() {
-    var _ref, _mediaSource$keys;
-
     var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
       afParameters: {}
     };
@@ -2143,126 +2367,27 @@ function getUserAgentData() {
         _parameters$afParamet = parameters.afParameters;
     _parameters$afParamet = _parameters$afParamet === void 0 ? {} : _parameters$afParamet;
     var mediaSource = _parameters$afParamet.mediaSource,
-        campaign = _parameters$afParamet.campaign,
-        channel = _parameters$afParamet.channel,
-        ad = _parameters$afParamet.ad,
-        adSet = _parameters$afParamet.adSet,
-        deepLinkValue = _parameters$afParamet.deepLinkValue,
-        afSub1 = _parameters$afParamet.afSub1,
-        afSub2 = _parameters$afParamet.afSub2,
-        afSub3 = _parameters$afParamet.afSub3,
-        afSub4 = _parameters$afParamet.afSub4,
-        afSub5 = _parameters$afParamet.afSub5,
-        afCustom = _parameters$afParamet.afCustom,
-        googleClickIdKey = _parameters$afParamet.googleClickIdKey,
         _parameters$referrerS = parameters.referrerSkipList,
         referrerSkipList = _parameters$referrerS === void 0 ? [] : _parameters$referrerS,
         _parameters$urlSkipLi = parameters.urlSkipList,
         urlSkipList = _parameters$urlSkipLi === void 0 ? [] : _parameters$urlSkipLi;
-    var oneLinkURLParts = (_ref = oneLinkURL || '') === null || _ref === void 0 ? void 0 : _ref.toString().match(AF_URL_SCHEME);
+    if (!isOneLinkURLValid(oneLinkURL)) return null;
+    if (!isSkipListsValid({
+      referrerSkipList: referrerSkipList,
+      urlSkipList: urlSkipList
+    })) return null;
+    if (!validatedMs(mediaSource)) return null;
+    var currentURLParams = getURLParametersKV(window.location.search);
+    var validParams = validateAndMappedParams(parameters.afParameters, currentURLParams);
+    if (!validParams) return null;
 
-    if (!oneLinkURLParts || (oneLinkURLParts === null || oneLinkURLParts === void 0 ? void 0 : oneLinkURLParts.length) < VALID_AF_URL_PARTS_LENGTH) {
-      console.error("oneLinkURL is missing or not in the correct format, can't generate URL", oneLinkURL);
-      return null;
-    }
-
-    if ((mediaSource === null || mediaSource === void 0 ? void 0 : (_mediaSource$keys = mediaSource.keys) === null || _mediaSource$keys === void 0 ? void 0 : _mediaSource$keys.length) === 0 && !(mediaSource !== null && mediaSource !== void 0 && mediaSource.defaultValue)) {
-      console.error("mediaSource is missing (default value was not supplied), can't generate URL", mediaSource);
-      return null;
-    }
-
-    if (isSkippedURL({
-      url: document.referrer,
-      skipKeys: referrerSkipList,
-      errorMsg: 'Generate url is skipped. HTTP referrer contains key:'
-    })) {
-      return null;
-    }
-
-    if (isSkippedURL({
-      url: document.URL,
-      skipKeys: urlSkipList,
-      errorMsg: 'Generate url is skipped. URL contains string:'
-    })) {
-      return null;
-    } // af_js_web=true and af_ss_ver=[version] will be added to every URL that was generated through this script
-
-
-    var afParams = {
+    var afParams = _objectSpread2({
       af_js_web: true,
       af_ss_ver: window.AF_SMART_SCRIPT.version
-    };
-    var currentURLParams = getURLParametersKV(window.location.search);
+    }, validParams);
 
-    if (mediaSource) {
-      var pidValue = getParameterValue(currentURLParams, mediaSource);
-
-      if (!pidValue) {
-        console.error("mediaSource was not found in the URL and default value was not supplied, can't generate URL", mediaSource);
-        return null;
-      }
-
-      afParams['pid'] = pidValue;
-    }
-
-    if (campaign) {
-      afParams['c'] = getParameterValue(currentURLParams, campaign);
-    }
-
-    if (channel) {
-      afParams['af_channel'] = getParameterValue(currentURLParams, channel);
-    }
-
-    if (ad) {
-      afParams['af_ad'] = getParameterValue(currentURLParams, ad);
-    }
-
-    if (adSet) {
-      afParams['af_adset'] = getParameterValue(currentURLParams, adSet);
-    }
-
-    if (deepLinkValue) {
-      afParams['deep_link_value'] = getParameterValue(currentURLParams, deepLinkValue);
-    }
-
-    var afSubs = [afSub1, afSub2, afSub3, afSub4, afSub5];
-    afSubs.forEach(function (afSub, index) {
-      if (afSub) {
-        afParams["af_sub".concat(index + 1)] = getParameterValue(currentURLParams, afSub);
-      }
-    });
-
-    if (googleClickIdKey) {
-      if (GCLID_EXCLUDE_PARAMS_KEYS.find(function (k) {
-        return k === googleClickIdKey;
-      })) {
-        console.debug("Google Click Id ParamKey can't override AF Parameters keys", googleClickIdKey);
-      } else {
-        var googleParameters = getGoogleClickIdParameters(googleClickIdKey, currentURLParams);
-        Object.keys(googleParameters).forEach(function (gpk) {
-          afParams[gpk] = googleParameters[gpk];
-        });
-      }
-    }
-
-    if (Array.isArray(afCustom)) {
-      afCustom.forEach(function (customParam) {
-        if (customParam !== null && customParam !== void 0 && customParam.paramKey) {
-          var isOverrideExistingKey = AF_CUSTOM_EXCLUDE_PARAMS_KEYS.find(function (k) {
-            return k === (customParam === null || customParam === void 0 ? void 0 : customParam.paramKey);
-          });
-
-          if ((customParam === null || customParam === void 0 ? void 0 : customParam.paramKey) === googleClickIdKey || isOverrideExistingKey) {
-            console.debug("Custom parameter ParamKey can't override Google-Click-Id or AF Parameters keys", customParam);
-          } else {
-            afParams[[customParam.paramKey]] = getParameterValue(currentURLParams, customParam);
-          }
-        }
-      });
-    }
-
-    var finalParams = stringifyParameters(afParams);
-    var finalURL = oneLinkURL + finalParams.replace('&', '?');
+    var finalParams = stringifyParameters(afParams).replace('&', '?');
+    var finalURL = oneLinkURL + finalParams;
     console.debug('Generated OneLink URL', finalURL);
 
     window.AF_SMART_SCRIPT.displayQrCode = function (htmlId) {
@@ -2317,8 +2442,86 @@ function getUserAgentData() {
     };
   };
 
+  var generateDirectClickURL = function generateDirectClickURL() {
+    var _campaign$keys;
+
+    var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
+      afParameters: {},
+      referrerSkipList: [],
+      urlSkipList: []
+    };
+    var _parameters$afParamet2 = parameters.afParameters,
+        afParameters = _parameters$afParamet2 === void 0 ? {} : _parameters$afParamet2,
+        _parameters$referrerS2 = parameters.referrerSkipList,
+        referrerSkipList = _parameters$referrerS2 === void 0 ? [] : _parameters$referrerS2,
+        _parameters$urlSkipLi2 = parameters.urlSkipList,
+        urlSkipList = _parameters$urlSkipLi2 === void 0 ? [] : _parameters$urlSkipLi2,
+        platform = parameters.platform,
+        app_id = parameters.app_id,
+        redirectURL = parameters.redirectURL;
+    var mediaSource = afParameters.mediaSource,
+        campaign = afParameters.campaign;
+
+    if (!mediaSource) {
+      console.error("mediaSource is missing , can't generate URL", mediaSource);
+      return null;
+    }
+
+    if (!campaign) {
+      console.error("campaign  is missing , can't generate URL", campaign);
+      return null;
+    }
+
+    if (!app_id) {
+      console.error("app_id is missing , can't generate URL", app_id);
+      return null;
+    }
+
+    if (!redirectURL) {
+      console.error("redirectURL is missing , can't generate URL", redirectURL);
+      return null;
+    }
+
+    if (!isPlatformValid(platform)) return null;
+
+    if (typeof app_id !== 'string') {
+      console.error('app_id must be a string');
+      return null;
+    }
+
+    if ((campaign === null || campaign === void 0 ? void 0 : (_campaign$keys = campaign.keys) === null || _campaign$keys === void 0 ? void 0 : _campaign$keys.length) === 0 && !(campaign !== null && campaign !== void 0 && campaign.defaultValue)) {
+      console.error("campaign is missing (default value was not supplied), can't generate URL", mediaSource);
+      return null;
+    }
+
+    if (!isSkipListsValid({
+      referrerSkipList: referrerSkipList,
+      urlSkipList: urlSkipList
+    })) return null;
+    if (!validatedMs(mediaSource)) return null;
+    var currentURLParams = getURLParametersKV(window.location.search);
+    var validParams = validateAndMappedParams(parameters.afParameters, currentURLParams, true);
+    if (!validParams) return null;
+
+    var afParams = _objectSpread2({
+      af_js_web: true,
+      af_ss_ver: window.AF_SMART_SCRIPT.version
+    }, validParams);
+
+    var finalParams = stringifyParameters(afParams).replace('&', '?');
+    var clickBaseUrl = 'https://engagements.appsflyer.com/v1.0/c2s/click/app';
+    var finalURL = "".concat(clickBaseUrl, "/").concat(platform, "/").concat(app_id).concat(finalParams, "&af_r=").concat(encodeURIComponent(redirectURL));
+    console.debug('generate Direct Click URL', finalURL);
+    delete window.AF_SMART_SCRIPT.displayQrCode;
+    delete window.AF_SMART_SCRIPT.fireImpressionsLink;
+    return {
+      clickURL: finalURL
+    };
+  };
+
   window.AF_SMART_SCRIPT = {
     generateOneLinkURL: generateOneLinkURL,
+    generateDirectClickURL: generateDirectClickURL,
     version: formatVersion
   };
 })();
